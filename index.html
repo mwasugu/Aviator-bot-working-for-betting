@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Pro Learning (Data Based)</title>
+    <title>Aviator 12-Min Cycle Master</title>
     <style>
-        /* --- MUONEKANO WA KISASA (DARK THEME) --- */
+        /* --- STYLE YA ZAMANI (NEON/DARK) --- */
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #050505;
-            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            background-color: #0d0d0d;
+            color: #e0e0e0;
             margin: 0;
             padding: 15px;
             display: flex;
@@ -17,381 +17,370 @@
             align-items: center;
         }
         .container {
-            background-color: #111;
+            background-color: #1a1a1a;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
             width: 100%;
             max-width: 450px;
             border: 1px solid #333;
         }
         h1 {
-            color: #00E676;
+            color: #4CAF50;
             text-align: center;
-            margin: 0 0 20px 0;
-            font-size: 22px;
-            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-size: 26px;
             letter-spacing: 1px;
         }
-
-        /* --- ALERTS ZINAZOFANYA KAZI --- */
-        .status-card {
+        
+        /* CLOCK & CYCLE DISPLAY */
+        .clock-box {
+            text-align: center;
+            background: #000;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+        }
+        #realTime { font-size: 24px; font-weight: bold; color: #fff; display: block; }
+        #cycleTime { font-size: 20px; color: #FFC107; font-weight: bold; display: block; margin-top: 5px; }
+        .cycle-label { font-size: 12px; color: #888; text-transform: uppercase; }
+
+        /* ALERTS SEPARATE */
+        .alert-box {
+            padding: 15px;
+            border-radius: 8px;
             text-align: center;
             font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
             transition: all 0.3s ease;
         }
-        
-        /* 1. MARKET STATUS (STREAKS) */
-        #marketStatus {
-            background: #1a1a1a;
-            border-left: 5px solid #555;
-            font-size: 18px;
+
+        /* 1. JACKPOT ALERT (Special) */
+        #jackpotAlert {
+            background-color: #111;
+            border: 1px dashed #555;
+            color: #777;
+            min-height: 20px;
         }
-        
-        /* 2. JACKPOT PROBABILITY */
-        #jackpotStatus {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            font-size: 15px;
+        .jackpot-active {
+            background-color: #1b5e20 !important; /* Green Bg */
+            color: #ffffff !important;
+            border: 2px solid #4CAF50 !important;
+            box-shadow: 0 0 15px #4CAF50;
+            animation: blink 1s infinite;
+        }
+
+        /* 2. GENERAL RISK (Red/Green Zone) */
+        #riskAlert {
+            background-color: #222;
+            border-left: 5px solid #555;
             color: #aaa;
         }
-        .prob-high {
-            background: #1b3a1b !important; /* Dark Green background */
-            color: #00E676 !important;
-            border: 1px solid #00E676 !important;
-            box-shadow: 0 0 15px rgba(0, 230, 118, 0.2);
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
 
-        /* --- INPUTS --- */
-        .input-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+        @keyframes blink { 50% { opacity: 0.7; } }
+
+        /* INPUTS */
+        label { display: block; margin-bottom: 5px; color: #aaa; font-weight: bold; }
+        .input-area { display: flex; gap: 10px; margin-bottom: 15px; }
+        
         input[type="number"] {
             flex: 1;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background: #222;
-            color: #fff;
-            font-size: 20px;
-            text-align: center;
-            font-weight: bold;
-            outline: none;
-        }
-        input:focus { border-color: #00E676; }
-        
-        #micBtn {
-            width: 60px;
-            background: #2979FF;
-            border: none;
-            border-radius: 8px;
+            padding: 12px;
+            background: #2c2c2c;
+            border: 1px solid #444;
             color: white;
-            font-size: 24px;
+            font-size: 18px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        #micBtn {
+            background: #2196F3;
+            border: none;
+            color: white;
+            width: 50px;
+            font-size: 20px;
+            border-radius: 6px;
             cursor: pointer;
         }
-        #micBtn:active { transform: scale(0.95); }
 
-        /* --- ACTIONS --- */
-        .main-btn {
+        /* BUTTONS */
+        .btn {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
             font-size: 16px;
             font-weight: bold;
-            border: none;
-            border-radius: 8px;
             cursor: pointer;
-            text-transform: uppercase;
             margin-bottom: 10px;
+            text-transform: uppercase;
         }
-        #logButton { background: #00E676; color: #000; }
-        .secondary-btn { background: #333; color: #ccc; width: 48%; }
-        .row-btn { display: flex; justify-content: space-between; }
+        #logButton { background-color: #4CAF50; color: #000; }
+        #undoButton { background-color: #FF9800; color: #000; width: 48%; }
+        #resetButton { background-color: #F44336; color: #fff; width: 48%; }
+        .btn-row { display: flex; justify-content: space-between; }
 
-        /* --- HISTORY LIST --- */
+        /* HISTORY */
         #historyLog {
-            margin-top: 15px;
-            max-height: 250px;
-            overflow-y: auto;
-            background: #0a0a0a;
-            border-radius: 8px;
+            margin-top: 20px;
+            background: #111;
             padding: 10px;
-            border: 1px solid #222;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
         }
         .hist-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #222;
+            font-size: 13px;
             display: flex;
             justify-content: space-between;
-            padding: 8px;
-            border-bottom: 1px solid #222;
-            font-size: 14px;
         }
-        .z-red { color: #FF5252; }
-        .z-green { color: #69F0AE; }
-        .z-gold { color: #FFD740; font-weight: bold; }
+        .z-high { color: #FFD740; } /* Jackpot Color */
+        .z-safe { color: #69F0AE; } /* Green Color */
+        .z-risk { color: #FF5252; } /* Red Color */
         
-        .stats-bar {
-            font-size: 11px;
-            color: #666;
-            text-align: center;
-            margin-top: 5px;
-        }
-        
-        /* Toggle */
-        .toggle-row { display: flex; justify-content: space-between; color: #888; font-size: 12px; margin-bottom: 10px; padding: 0 5px; }
+        .learn-status { text-align: center; font-size: 12px; color: #666; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Aviator Data Analytics</h1>
+    <h1>Aviator 12-Min System</h1>
 
-    <div id="marketStatus" class="status-card">
-        Kusanya Data (Weka raundi 3+)
+    <div class="clock-box">
+        <span id="realTime">--:--:--</span>
+        <span class="cycle-label">TIME CYCLE (12 MIN LOOP)</span>
+        <span id="cycleTime">00:00</span>
     </div>
 
-    <div id="jackpotStatus" class="status-card">
-        Jackpot Analysis: Inasubiri data...
+    <div id="jackpotAlert" class="alert-box">
+        📡 Inasubiri Data za Mzunguko...
     </div>
 
-    <div class="input-row">
-        <input type="number" id="roundInput" step="0.01" placeholder="1.00">
+    <div id="riskAlert" class="alert-box">
+        Learning Mode: Weka Raundi (0/5)
+    </div>
+
+    <label>Ingiza Multiplier:</label>
+    <div class="input-area">
+        <input type="number" id="roundInput" step="0.01" placeholder="Mf: 1.50">
         <button id="micBtn">🎤</button>
     </div>
 
-    <div class="toggle-row">
-        <span>Auto-Log Sauti: <input type="checkbox" id="autoLogCheck" checked></span>
+    <button id="logButton" class="btn">REKODI DATA (LOG)</button>
+
+    <div class="btn-row">
+        <button id="undoButton" class="btn">UNDO</button>
+        <button id="resetButton" class="btn">RESET</button>
     </div>
-
-    <button id="logButton" class="main-btn">WEKA MATOKEO (LOG)</button>
-
-    <div class="row-btn">
-        <button id="undoButton" class="secondary-btn">UNDO LAST</button>
-        <button id="resetButton" class="secondary-btn" style="background:#d32f2f; color:white;">RESET ALL</button>
-    </div>
-
-    <div class="stats-bar" id="statsBar">Raundi: 0</div>
+    
+    <div class="learn-status" id="learnStatus">Data Points: 0 | Learning: Active</div>
 
     <div id="historyLog"></div>
 </div>
 
 <script>
-// --- MFUMO WA KUJIFUNZA (DATA DRIVEN) ---
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Variables
-    let history = JSON.parse(localStorage.getItem('avi_pro_history') || '[]');
-    
-    // Elements
-    const roundInput = document.getElementById('roundInput');
-    const marketStatusEl = document.getElementById('marketStatus');
-    const jackpotStatusEl = document.getElementById('jackpotStatus');
-    const historyLogEl = document.getElementById('historyLog');
-    const statsBarEl = document.getElementById('statsBar');
-    const micBtn = document.getElementById('micBtn');
-    const autoLogCheck = document.getElementById('autoLogCheck');
+    // --- SETTINGS ---
+    const CYCLE_SECONDS = 720; // Dakika 12
+    const LEARNING_THRESHOLD = 5; // Raundi za chini kabla ya kuanza kutoa alert
+    const ALERT_WINDOW = 30; // Sekunde +/- za kuangalia historia
 
-    // --- 1. CORE: KUCHAMBUA DATA (ALERTS) ---
-    function analyzeData() {
-        if (history.length < 3) {
-            marketStatusEl.innerHTML = "Kusanya Data (Weka raundi 3+)";
-            marketStatusEl.style.borderLeft = "5px solid #555";
-            marketStatusEl.style.color = "#fff";
-            
-            jackpotStatusEl.innerHTML = "Jackpot Analysis: Inasubiri data...";
-            jackpotStatusEl.className = "status-card"; // Reset class
+    // --- VARIABLES ---
+    let history = JSON.parse(localStorage.getItem('avi_12m_history') || '[]');
+    
+    // --- ELEMENTS ---
+    const els = {
+        realTime: document.getElementById('realTime'),
+        cycleTime: document.getElementById('cycleTime'),
+        jackpotAlert: document.getElementById('jackpotAlert'),
+        riskAlert: document.getElementById('riskAlert'),
+        input: document.getElementById('roundInput'),
+        logBtn: document.getElementById('logButton'),
+        undoBtn: document.getElementById('undoButton'),
+        resetBtn: document.getElementById('resetButton'),
+        micBtn: document.getElementById('micBtn'),
+        list: document.getElementById('historyLog'),
+        status: document.getElementById('learnStatus')
+    };
+
+    // --- TIME FUNCTIONS ---
+    function getCycleSeconds() {
+        const now = new Date();
+        const totalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        return totalSec % CYCLE_SECONDS;
+    }
+
+    function formatCycleTime(sec) {
+        const m = Math.floor(sec / 60).toString().padStart(2, '0');
+        const s = (sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    // --- CORE LOGIC: CHECK ALERTS BASED ON CYCLE TIME ---
+    function checkAlerts() {
+        const currentSec = getCycleSeconds();
+        
+        // 1. Hakuna Alert kama bado tunajifunza (Chini ya raundi 5)
+        if (history.length < LEARNING_THRESHOLD) {
+            els.riskAlert.textContent = `Learning Mode: Weka Raundi (${history.length}/${LEARNING_THRESHOLD})`;
+            els.jackpotAlert.textContent = "📡 Inasubiri Data za Mzunguko...";
+            els.jackpotAlert.className = "alert-box";
             return;
         }
 
-        // A. MARKET STATUS (STREAK ANALYSIS) - Inategemea raundi za mwisho
-        const last1 = history[0];
-        const last2 = history[1];
-        const last3 = history[2];
-        
-        let statusText = "";
-        let borderColor = "#555";
-        let textColor = "#fff";
+        // 2. KUSANYA DATA ZA HISTORIA KWA MUDA HUU (WINDOW)
+        // Tunatafuta raundi zote zilizotokea ndani ya +/- 30 sec ya muda huu
+        let relevantRounds = history.filter(item => {
+            let diff = Math.abs(item.cycleSec - currentSec);
+            if (diff > CYCLE_SECONDS / 2) diff = CYCLE_SECONDS - diff; // Handle wrap around
+            return diff <= ALERT_WINDOW;
+        });
 
-        // Logic ya Streak
-        if (last1 < 2.00 && last2 < 2.00) {
-            if (last3 < 2.00) {
-                statusText = "🚨 HATARI KUBWA (RED STREAK)";
-                borderColor = "#FF5252"; // Red
-                textColor = "#FF5252";
-            } else {
-                statusText = "⚠️ HATARI INAANZA (2 REDS)";
-                borderColor = "#FFAB40"; // Orange
-                textColor = "#FFAB40";
-            }
-        } else if (last1 >= 2.00 && last2 >= 2.00) {
-            statusText = "✅ SOKO ZURI (GREEN STREAK)";
-            borderColor = "#69F0AE"; // Green
-            textColor = "#69F0AE";
+        // --- A. JACKPOT ALERT (SEPARATE) ---
+        // Angalia kama kuna Jackpot (10x+) ilitokea muda huu kwenye mzunguko uliopita
+        const hasJackpotHistory = relevantRounds.some(r => r.val >= 10.00);
+        
+        if (hasJackpotHistory) {
+            els.jackpotAlert.innerHTML = `💰 <b>JACKPOT ZONE!</b><br>Muda huu umewahi kutoa 10x+`;
+            els.jackpotAlert.className = "alert-box jackpot-active";
         } else {
-            statusText = "🔄 MCHANGANYIKO (VOLATILE)";
-            borderColor = "#2196F3"; // Blue
-            textColor = "#ffffff";
+            els.jackpotAlert.textContent = "Hakuna tishio la Jackpot kwa sasa.";
+            els.jackpotAlert.className = "alert-box";
+            els.jackpotAlert.style.color = "#555";
+            els.jackpotAlert.style.backgroundColor = "#111";
+            els.jackpotAlert.style.border = "1px dashed #555";
         }
-        
-        marketStatusEl.innerHTML = statusText;
-        marketStatusEl.style.borderLeft = `5px solid ${borderColor}`;
-        marketStatusEl.style.color = textColor;
 
-
-        // B. JACKPOT PROBABILITY (DATA DRIVEN - NO TIMER)
-        const jackpots = history.filter(val => val >= 10.00);
-        
-        if (jackpots.length < 2) {
-            jackpotStatusEl.innerHTML = `Data haitoshi kupima Jackpot (${jackpots.length} imepatikana).`;
-            jackpotStatusEl.className = "status-card";
+        // --- B. RISK ASSESSMENT (RED/GREEN) ---
+        if (relevantRounds.length === 0) {
+            els.riskAlert.textContent = "Hakuna data ya kutosha kwa muda huu wa mzunguko.";
+            els.riskAlert.style.borderLeft = "5px solid #555";
+            els.riskAlert.style.backgroundColor = "#222";
+            els.riskAlert.style.color = "#aaa";
         } else {
-            // Tafuta wastani wa nafasi (average gap) kati ya jackpots
-            let gaps = [];
-            let lastIndex = -1;
-            
-            // Hesabu nafasi kwa kupitia historia nzima
-            // Kumbuka: history[0] ni mpya zaidi
-            for (let i = history.length - 1; i >= 0; i--) {
-                if (history[i] >= 10.00) {
-                    if (lastIndex !== -1) {
-                        gaps.push(i - lastIndex); // Nafasi kati ya jackpot hii na iliyopita
-                    }
-                    lastIndex = i;
-                }
-            }
-            
-            // Ikiwa hakuna gaps (jackpot moja tu au hazifuatani vizuri), ruka
-            if (gaps.length === 0) {
-                 // Fallback calculation (rough estimate)
-                 gaps.push(20); // Default assumption if calculation fails
-            }
+            // Hesabu Red vs Green katika dirisha hili
+            let redCount = relevantRounds.filter(r => r.val < 2.00).length;
+            let total = relevantRounds.length;
+            let redPercent = (redCount / total) * 100;
 
-            // Wastani wa raundi kati ya Jackpot
-            const avgGap = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-            
-            // Raundi ngapi zimepita tangu Jackpot ya mwisho?
-            // history[0] is latest. Find index of first value >= 10
-            let roundsSinceLastJackpot = 0;
-            for (let i = 0; i < history.length; i++) {
-                if (history[i] >= 10.00) {
-                    break;
-                }
-                roundsSinceLastJackpot++;
-            }
-
-            // KOKOTOO LA ASILIMIA (Learning Formula)
-            let probability = (roundsSinceLastJackpot / avgGap) * 100;
-            if (probability > 99) probability = 99; // Cap at 99%
-
-            // Logic ya Alert
-            if (probability > 80) {
-                jackpotStatusEl.innerHTML = `🔥 <b>UWEZEKANO MKUBWA: ${probability.toFixed(0)}%</b><br>Imepita raundi ${roundsSinceLastJackpot} (Wastani ni ${Math.round(avgGap)})`;
-                jackpotStatusEl.className = "status-card prob-high";
+            if (redPercent >= 60) {
+                els.riskAlert.innerHTML = `🚨 <b>HATARI (HIGH RISK)</b><br>${redPercent.toFixed(0)}% ya historia muda huu ni < 2.00x`;
+                els.riskAlert.style.borderLeft = "5px solid #FF5252"; // Red
+                els.riskAlert.style.color = "#FF5252";
+                els.riskAlert.style.backgroundColor = "#3b1010";
+            } else if (redPercent <= 30 && total >= 2) {
+                els.riskAlert.innerHTML = `✅ <b>SALAMA (SAFE ZONE)</b><br>Historia inaonyesha matokeo mazuri muda huu.`;
+                els.riskAlert.style.borderLeft = "5px solid #69F0AE"; // Green
+                els.riskAlert.style.color = "#69F0AE";
+                els.riskAlert.style.backgroundColor = "#103b1a";
             } else {
-                jackpotStatusEl.innerHTML = `Uwezekano wa Jackpot: <b>${probability.toFixed(0)}%</b><br>Raundi ${roundsSinceLastJackpot} tangu Jackpot (Wastani: ${Math.round(avgGap)})`;
-                jackpotStatusEl.className = "status-card";
+                els.riskAlert.innerHTML = `⚠️ <b>KAWAIDA (MODERATE)</b><br>Soko limechanganyika muda huu.`;
+                els.riskAlert.style.borderLeft = "5px solid #FFD740"; // Yellow
+                els.riskAlert.style.color = "#FFD740";
+                els.riskAlert.style.backgroundColor = "#3b3010";
             }
         }
     }
 
-    // --- 2. UI UPDATES ---
-    function renderHistory() {
-        statsBarEl.textContent = `Jumla ya Raundi: ${history.length}`;
+    // --- UPDATE UI ---
+    function updateUI() {
+        const now = new Date();
+        els.realTime.textContent = now.toLocaleTimeString('en-GB'); // HH:MM:SS
+        els.cycleTime.textContent = formatCycleTime(getCycleSeconds());
         
-        historyLogEl.innerHTML = history.map((val, index) => {
-            let colorClass = "z-red";
-            if (val >= 10.00) colorClass = "z-gold";
-            else if (val >= 2.00) colorClass = "z-green";
+        checkAlerts(); // Run alerts continuously based on time
+        
+        els.status.textContent = `Jumla ya Data: ${history.length}`;
+    }
+
+    function renderList() {
+        els.list.innerHTML = history.map((item, i) => {
+            let color = "z-risk";
+            if (item.val >= 10) color = "z-high";
+            else if (item.val >= 2) color = "z-safe";
             
             return `<div class="hist-item">
-                <span>#${history.length - index}</span>
-                <span class="${colorClass}">${val.toFixed(2)}x</span>
+                <span style="color:#666">[${formatCycleTime(item.cycleSec)}]</span>
+                <span class="${color}">${item.val.toFixed(2)}x</span>
             </div>`;
         }).join('');
-        
-        analyzeData(); // Run analysis every time UI updates
     }
 
-    function save() {
-        localStorage.setItem('avi_pro_history', JSON.stringify(history));
-        renderHistory();
+    // --- ACTIONS ---
+    function logRound() {
+        const val = parseFloat(els.input.value);
+        if (!val || isNaN(val)) return;
+
+        const newEntry = {
+            val: val,
+            cycleSec: getCycleSeconds(),
+            timestamp: new Date().getTime()
+        };
+
+        history.unshift(newEntry); // Add newest first
+        if (history.length > 150) history.pop(); // Keep memory manageable
+        
+        localStorage.setItem('avi_12m_history', JSON.stringify(history));
+        els.input.value = '';
+        renderList();
     }
 
-    // --- 3. BUTTON ACTIONS ---
-    document.getElementById('logButton').addEventListener('click', () => {
-        const val = parseFloat(roundInput.value);
-        if (!val || isNaN(val)) return alert("Weka namba halali!");
-        
-        history.unshift(val); // Add to top
-        if (history.length > 200) history.pop(); // Keep limit
-        
-        roundInput.value = '';
-        save();
-    });
-
-    document.getElementById('undoButton').addEventListener('click', () => {
+    function undoRound() {
         if (history.length > 0) {
-            roundInput.value = history.shift(); // Remove top and put back in input
-            save();
+            const removed = history.shift();
+            els.input.value = removed.val;
+            localStorage.setItem('avi_12m_history', JSON.stringify(history));
+            renderList();
         }
-    });
+    }
 
-    document.getElementById('resetButton').addEventListener('click', () => {
-        if (confirm("Futa data zote?")) {
+    function resetData() {
+        if(confirm("Futa data zote uanze upya?")) {
             history = [];
-            save();
+            localStorage.removeItem('avi_12m_history');
+            renderList();
         }
-    });
+    }
 
-    // --- 4. VOICE INPUT (KWA KISWAHILI/ENGLISH) ---
+    // --- LISTENERS ---
+    els.logBtn.addEventListener('click', logRound);
+    els.undoBtn.addEventListener('click', undoRound);
+    els.resetBtn.addEventListener('click', resetData);
+
+    // --- VOICE INPUT ---
     if (window.webkitSpeechRecognition || window.SpeechRecognition) {
         const SpeechApi = window.webkitSpeechRecognition || window.SpeechRecognition;
         const recognition = new SpeechApi();
-        recognition.continuous = false;
-        recognition.lang = 'en-US'; // Namba zinasomeka vizuri zaidi kwa English model
-
-        micBtn.addEventListener('click', () => {
-            micBtn.style.background = "red";
+        recognition.lang = 'en-US';
+        
+        els.micBtn.addEventListener('click', () => {
+            els.micBtn.style.backgroundColor = "red";
             recognition.start();
         });
 
-        recognition.onresult = (event) => {
-            micBtn.style.background = "#2979FF";
-            const transcript = event.results[0][0].transcript;
-            // Extract number only
-            const number = transcript.match(/(\d+(\.\d+)?)/);
-            
-            if (number) {
-                roundInput.value = parseFloat(number[0]).toFixed(2);
-                if (autoLogCheck.checked) {
-                    document.getElementById('logButton').click();
-                }
-            } else {
-                alert("Sikusikia namba. Jaribu tena.");
+        recognition.onresult = (e) => {
+            const num = e.results[0][0].transcript.match(/(\d+(\.\d+)?)/);
+            if (num) {
+                els.input.value = parseFloat(num[0]).toFixed(2);
+                logRound(); // Auto log
             }
+            els.micBtn.style.backgroundColor = "#2196F3";
         };
-        
-        recognition.onerror = () => {
-            micBtn.style.background = "#2979FF";
-        };
-        recognition.onend = () => {
-            micBtn.style.background = "#2979FF";
-        };
+        recognition.onerror = () => els.micBtn.style.backgroundColor = "#2196F3";
+        recognition.onend = () => els.micBtn.style.backgroundColor = "#2196F3";
     } else {
-        micBtn.style.display = "none"; // Hide if not supported
+        els.micBtn.style.display = 'none';
     }
 
-    // Initial Load
-    renderHistory();
+    // --- LOOP ---
+    setInterval(updateUI, 1000);
+    renderList();
+    updateUI();
 });
 </script>
 
