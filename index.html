@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Pro Learning (Data Based)</title>
+    <style>
+        /* --- MUONEKANO WA KISASA (DARK THEME) --- */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #111;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid #333;
+        }
+        h1 {
+            color: #00E676;
+            text-align: center;
+            margin: 0 0 20px 0;
+            font-size: 22px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- ALERTS ZINAZOFANYA KAZI --- */
+        .status-card {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        /* 1. MARKET STATUS (STREAKS) */
+        #marketStatus {
+            background: #1a1a1a;
+            border-left: 5px solid #555;
+            font-size: 18px;
+        }
+        
+        /* 2. JACKPOT PROBABILITY */
+        #jackpotStatus {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            font-size: 15px;
+            color: #aaa;
+        }
+        .prob-high {
+            background: #1b3a1b !important; /* Dark Green background */
+            color: #00E676 !important;
+            border: 1px solid #00E676 !important;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- INPUTS --- */
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input[type="number"] {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #222;
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            font-weight: bold;
+            outline: none;
+        }
+        input:focus { border-color: #00E676; }
+        
+        #micBtn {
+            width: 60px;
+            background: #2979FF;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #micBtn:active { transform: scale(0.95); }
+
+        /* --- ACTIONS --- */
+        .main-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        #logButton { background: #00E676; color: #000; }
+        .secondary-btn { background: #333; color: #ccc; width: 48%; }
+        .row-btn { display: flex; justify-content: space-between; }
+
+        /* --- HISTORY LIST --- */
+        #historyLog {
+            margin-top: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+            background: #0a0a0a;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #222;
+        }
+        .hist-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #222;
+            font-size: 14px;
+        }
+        .z-red { color: #FF5252; }
+        .z-green { color: #69F0AE; }
+        .z-gold { color: #FFD740; font-weight: bold; }
+        
+        .stats-bar {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        /* Toggle */
+        .toggle-row { display: flex; justify-content: space-between; color: #888; font-size: 12px; margin-bottom: 10px; padding: 0 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Aviator Data Analytics</h1>
+
+    <div id="marketStatus" class="status-card">
+        Kusanya Data (Weka raundi 3+)
+    </div>
+
+    <div id="jackpotStatus" class="status-card">
+        Jackpot Analysis: Inasubiri data...
+    </div>
+
+    <div class="input-row">
+        <input type="number" id="roundInput" step="0.01" placeholder="1.00">
+        <button id="micBtn">🎤</button>
+    </div>
+
+    <div class="toggle-row">
+        <span>Auto-Log Sauti: <input type="checkbox" id="autoLogCheck" checked></span>
+    </div>
+
+    <button id="logButton" class="main-btn">WEKA MATOKEO (LOG)</button>
+
+    <div class="row-btn">
+        <button id="undoButton" class="secondary-btn">UNDO LAST</button>
+        <button id="resetButton" class="secondary-btn" style="background:#d32f2f; color:white;">RESET ALL</button>
+    </div>
+
+    <div class="stats-bar" id="statsBar">Raundi: 0</div>
+
+    <div id="historyLog"></div>
+</div>
+
+<script>
+// --- MFUMO WA KUJIFUNZA (DATA DRIVEN) ---
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Variables
+    let history = JSON.parse(localStorage.getItem('avi_pro_history') || '[]');
+    
+    // Elements
+    const roundInput = document.getElementById('roundInput');
+    const marketStatusEl = document.getElementById('marketStatus');
+    const jackpotStatusEl = document.getElementById('jackpotStatus');
+    const historyLogEl = document.getElementById('historyLog');
+    const statsBarEl = document.getElementById('statsBar');
+    const micBtn = document.getElementById('micBtn');
+    const autoLogCheck = document.getElementById('autoLogCheck');
+
+    // --- 1. CORE: KUCHAMBUA DATA (ALERTS) ---
+    function analyzeData() {
+        if (history.length < 3) {
+            marketStatusEl.innerHTML = "Kusanya Data (Weka raundi 3+)";
+            marketStatusEl.style.borderLeft = "5px solid #555";
+            marketStatusEl.style.color = "#fff";
+            
+            jackpotStatusEl.innerHTML = "Jackpot Analysis: Inasubiri data...";
+            jackpotStatusEl.className = "status-card"; // Reset class
+            return;
+        }
+
+        // A. MARKET STATUS (STREAK ANALYSIS) - Inategemea raundi za mwisho
+        const last1 = history[0];
+        const last2 = history[1];
+        const last3 = history[2];
+        
+        let statusText = "";
+        let borderColor = "#555";
+        let textColor = "#fff";
+
+        // Logic ya Streak
+        if (last1 < 2.00 && last2 < 2.00) {
+            if (last3 < 2.00) {
+                statusText = "🚨 HATARI KUBWA (RED STREAK)";
+                borderColor = "#FF5252"; // Red
+                textColor = "#FF5252";
+            } else {
+                statusText = "⚠️ HATARI INAANZA (2 REDS)";
+                borderColor = "#FFAB40"; // Orange
+                textColor = "#FFAB40";
+            }
+        } else if (last1 >= 2.00 && last2 >= 2.00) {
+            statusText = "✅ SOKO ZURI (GREEN STREAK)";
+            borderColor = "#69F0AE"; // Green
+            textColor = "#69F0AE";
+        } else {
+            statusText = "🔄 MCHANGANYIKO (VOLATILE)";
+            borderColor = "#2196F3"; // Blue
+            textColor = "#ffffff";
+        }
+        
+        marketStatusEl.innerHTML = statusText;
+        marketStatusEl.style.borderLeft = `5px solid ${borderColor}`;
+        marketStatusEl.style.color = textColor;
+
+
+        // B. JACKPOT PROBABILITY (DATA DRIVEN - NO TIMER)
+        const jackpots = history.filter(val => val >= 10.00);
+        
+        if (jackpots.length < 2) {
+            jackpotStatusEl.innerHTML = `Data haitoshi kupima Jackpot (${jackpots.length} imepatikana).`;
+            jackpotStatusEl.className = "status-card";
+        } else {
+            // Tafuta wastani wa nafasi (average gap) kati ya jackpots
+            let gaps = [];
+            let lastIndex = -1;
+            
+            // Hesabu nafasi kwa kupitia historia nzima
+            // Kumbuka: history[0] ni mpya zaidi
+            for (let i = history.length - 1; i >= 0; i--) {
+                if (history[i] >= 10.00) {
+                    if (lastIndex !== -1) {
+                        gaps.push(i - lastIndex); // Nafasi kati ya jackpot hii na iliyopita
+                    }
+                    lastIndex = i;
+                }
+            }
+            
+            // Ikiwa hakuna gaps (jackpot moja tu au hazifuatani vizuri), ruka
+            if (gaps.length === 0) {
+                 // Fallback calculation (rough estimate)
+                 gaps.push(20); // Default assumption if calculation fails
+            }
+
+            // Wastani wa raundi kati ya Jackpot
+            const avgGap = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+            
+            // Raundi ngapi zimepita tangu Jackpot ya mwisho?
+            // history[0] is latest. Find index of first value >= 10
+            let roundsSinceLastJackpot = 0;
+            for (let i = 0; i < history.length; i++) {
+                if (history[i] >= 10.00) {
+                    break;
+                }
+                roundsSinceLastJackpot++;
+            }
+
+            // KOKOTOO LA ASILIMIA (Learning Formula)
+            let probability = (roundsSinceLastJackpot / avgGap) * 100;
+            if (probability > 99) probability = 99; // Cap at 99%
+
+            // Logic ya Alert
+            if (probability > 80) {
+                jackpotStatusEl.innerHTML = `🔥 <b>UWEZEKANO MKUBWA: ${probability.toFixed(0)}%</b><br>Imepita raundi ${roundsSinceLastJackpot} (Wastani ni ${Math.round(avgGap)})`;
+                jackpotStatusEl.className = "status-card prob-high";
+            } else {
+                jackpotStatusEl.innerHTML = `Uwezekano wa Jackpot: <b>${probability.toFixed(0)}%</b><br>Raundi ${roundsSinceLastJackpot} tangu Jackpot (Wastani: ${Math.round(avgGap)})`;
+                jackpotStatusEl.className = "status-card";
+            }
+        }
+    }
+
+    // --- 2. UI UPDATES ---
+    function renderHistory() {
+        statsBarEl.textContent = `Jumla ya Raundi: ${history.length}`;
+        
+        historyLogEl.innerHTML = history.map((val, index) => {
+            let colorClass = "z-red";
+            if (val >= 10.00) colorClass = "z-gold";
+            else if (val >= 2.00) colorClass = "z-green";
+            
+            return `<div class="hist-item">
+                <span>#${history.length - index}</span>
+                <span class="${colorClass}">${val.toFixed(2)}x</span>
+            </div>`;
+        }).join('');
+        
+        analyzeData(); // Run analysis every time UI updates
+    }
+
+    function save() {
+        localStorage.setItem('avi_pro_history', JSON.stringify(history));
+        renderHistory();
+    }
+
+    // --- 3. BUTTON ACTIONS ---
+    document.getElementById('logButton').addEventListener('click', () => {
+        const val = parseFloat(roundInput.value);
+        if (!val || isNaN(val)) return alert("Weka namba halali!");
+        
+        history.unshift(val); // Add to top
+        if (history.length > 200) history.pop(); // Keep limit
+        
+        roundInput.value = '';
+        save();
+    });
+
+    document.getElementById('undoButton').addEventListener('click', () => {
+        if (history.length > 0) {
+            roundInput.value = history.shift(); // Remove top and put back in input
+            save();
+        }
+    });
+
+    document.getElementById('resetButton').addEventListener('click', () => {
+        if (confirm("Futa data zote?")) {
+            history = [];
+            save();
+        }
+    });
+
+    // --- 4. VOICE INPUT (KWA KISWAHILI/ENGLISH) ---
+    if (window.webkitSpeechRecognition || window.SpeechRecognition) {
+        const SpeechApi = window.webkitSpeechRecognition || window.SpeechRecognition;
+        const recognition = new SpeechApi();
+        recognition.continuous = false;
+        recognition.lang = 'en-US'; // Namba zinasomeka vizuri zaidi kwa English model
+
+        micBtn.addEventListener('click', () => {
+            micBtn.style.background = "red";
+            recognition.start();
+        });
+
+        recognition.onresult = (event) => {
+            micBtn.style.background = "#2979FF";
+            const transcript = event.results[0][0].transcript;
+            // Extract number only
+            const number = transcript.match(/(\d+(\.\d+)?)/);
+            
+            if (number) {
+                roundInput.value = parseFloat(number[0]).toFixed(2);
+                if (autoLogCheck.checked) {
+                    document.getElementById('logButton').click();
+                }
+            } else {
+                alert("Sikusikia namba. Jaribu tena.");
+            }
+        };
+        
+        recognition.onerror = () => {
+            micBtn.style.background = "#2979FF";
+        };
+        recognition.onend = () => {
+            micBtn.style.background = "#2979FF";
+        };
+    } else {
+        micBtn.style.display = "none"; // Hide if not supported
+    }
+
+    // Initial Load
+    renderHistory();
+});
+</script>
+
+</body>
+</html>
