@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Learning Log (Live Time Auto-Reset)</title>
+    <style>
+        /* CSS YA UREMBO (Unchanged) */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #0d0d0d;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #1a1a1a;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 450px;
+        }
+        h1 {
+            color: #00bcd4;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #bdbdbd;
+        }
+        input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin-bottom: 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background-color: #2c2c2c;
+            color: #fff;
+            font-size: 18px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-bottom: 10px;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* MAIN BUTTON STYLES */
+        #logButton {
+            background-color: #00bcd4;
+            color: #1a1a1a;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        #logButton:hover { background-color: #4dd0e1; }
+        
+        /* ACTION BUTTONS */
+        #deleteLastBtn {
+            background-color: #FF9800;
+            color: #1a1a1a;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #deleteLastBtn:hover { background-color: #FFB74D; }
+
+        #resetErrorsBtn {
+            background-color: #F44336;
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #resetErrorsBtn:hover { background-color: #E57373; }
+        
+        /* VOICE INPUT & CLOCK STYLES */
+        .input-controls {
+            display: flex;
+            align-items: stretch;
+            margin-bottom: 15px;
+        }
+        
+        #micBtn {
+            width: 55px; 
+            padding: 0; 
+            background-color: #2196F3;
+            color: white;
+            margin: 0 0 0 10px;
+            border-radius: 8px;
+            font-size: 20px;
+            line-height: 44px;
+        }
+
+        #autoSubmitToggle {
+            width: 100%;
+            padding: 5px;
+            font-size: 12px;
+            background-color: #333;
+            color: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        #autoSubmitToggle.on {
+            background-color: #4CAF50;
+        }
+        #autoSubmitToggle.off {
+            background-color: #9E9E9E;
+        }
+
+        #timeContainer {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #333;
+            text-align: center;
+        }
+        #cycleTimeDisplay {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+        #clockDisplay {
+            font-size: 36px;
+            font-weight: bold;
+            color: #E57373;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #2c2c2c;
+            border-left: 5px solid #00bcd4;
+        }
+        .log-status {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FFC107;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .zone-status {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px 0;
+        }
+        .zone-status.red { color: #E57373; }
+        .zone-status.green { color: #8BC34A; }
+        .zone-status.orange { color: #FF9800; }
+
+        #riskAssessment {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 16px;
+        }
+        #resetWarning {
+            background-color: #FF0000;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        #historyLog {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #1f1f1f;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        #historyLog h3 {
+            color: #00bcd4;
+            margin-top: 0;
+            border-bottom: 1px dotted #444;
+            padding-bottom: 5px;
+            font-size: 18px;
+        }
+        .history-item {
+            font-size: 14px;
+            padding: 4px 0;
+            border-bottom: 1px dotted #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Aviator Learning Log</h1>
+
+        <div id="timeContainer">
+            <div id="cycleTimeDisplay">--:--</div>
+            <div id="clockDisplay">--:--:--</div>
+        </div>
+        
+        <label for="roundInput" id="roundLabel">Weka Matokeo Halisi ya Mzunguko (Multiplier):</label>
+        
+        <div class="input-controls">
+            <input type="number" id="roundInput" step="0.01" placeholder="Mfano: 1.50 au 8.23">
+            <button id="micBtn">🎤</button>
+        </div>
+        
+        <button id="autoSubmitToggle" class="off">Automatic Voice Input: OFF ❌</button>
+        
+        <button id="logButton">INGIZA MATOKEO HALISI na Jifunze</button>
+        <button id="deleteLastBtn">Futa Raundi ya Mwisho (Kama Ulikosea)</button>
+        <button id="resetErrorsBtn">Futa Makosa Yote (Reset Errors Only)</button>
+        
+        <div id="resetWarning">
+            🚨 Mfumo Umefuta Data: Imeanza upya!
+        </div>
+
+        <div id="results" class="result-box">
+            <div id="riskAssessment">Inachambua hatari...</div>
+            <div class="zone-status" id="zoneStatus">Tayari Kuandikisha Matokeo</div>
+            <div class="log-status" id="logStatus"></div>
+            <div class="learning-status" id="learningStatus"></div>
+        </div>
+
+        <div id="historyLog">
+            <h3>Historia ya Raundi Zilizopita (Last Rounds):</h3>
+            <div id="historyList"></div>
+        </div>
+        
+        <p class="disclaimer" style="font-size: 12px; color: #9e9e9e; text-align: center; margin-top: 20px;">
+            Kanusho: Mfumo huu unajifunza kwa Historia yako uliyoweka.
+        </p>
+
+    </div>
+
+    <script>
+        // --- GLOBAL VARIABLES ---
+        const CYCLE_SECONDS = 720;
+        const ERROR_THRESHOLD = 2.00; 
+        const MIN_ATTEMPTS_FOR_RESET = 30; 
+        const MISTAKE_PERCENTAGE_RESET = 0.35; 
+        
+        let attempts = parseInt(localStorage.getItem('aviator_attempts') || 0);
+        let mistakes = parseInt(localStorage.getItem('aviator_mistakes') || 0);
+        let history = JSON.parse(localStorage.getItem('aviator_history') || '[]');
+        
+        let isAutoSubmitEnabled = false; 
+
+        const MIC_BUTTON_DEFAULT_COLOR = '#2196F3'; 
+        const MIC_BUTTON_RECORDING_COLOR = '#FF0000'; 
+        
+        const roundInput = document.getElementById('roundInput'); 
+        const logButton = document.getElementById('logButton'); 
+        const deleteLastBtn = document.getElementById('deleteLastBtn');
+        const resetErrorsBtn = document.getElementById('resetErrorsBtn');
+        const micBtn = document.getElementById('micBtn');
+        const autoSubmitToggle = document.getElementById('autoSubmitToggle'); 
+        const clockDisplay = document.getElementById('clockDisplay');
+        const cycleTimeDisplay = document.getElementById('cycleTimeDisplay');
+        const logStatusEl = document.getElementById('logStatus');
+        const zoneStatusEl = document.getElementById('zoneStatus');
+        const learningStatusEl = document.getElementById('learningStatus');
+        const historyListEl = document.getElementById('historyList');
+        const riskAssessmentEl = document.getElementById('riskAssessment');
+        const resetWarningEl = document.getElementById('resetWarning');
+
+        // --- CORE FUNCTIONS (Unchanged) ---
+        function resetSystem(fullReset = true) {
+            if (fullReset) {
+                localStorage.removeItem('aviator_attempts');
+                localStorage.removeItem('aviator_history');
+                attempts = 0;
+                history = [];
+                resetWarningEl.textContent = '🚨 Mfumo Umefuta Data: Imeanza upya!';
+            }
+            
+            localStorage.removeItem('aviator_mistakes');
+            mistakes = 0;
+
+            updateLearningStatus();
+            renderHistory();
+            resetWarningEl.style.display = 'block';
+            setTimeout(() => { resetWarningEl.style.display = 'none'; }, 5000); 
+        }
+
+        function checkForAutoReset() {
+            if (attempts > MIN_ATTEMPTS_FOR_RESET) {
+                if (mistakes / attempts > MISTAKE_PERCENTAGE_RESET) {
+                    resetSystem(true);
+                }
+            }
+        }
+
+        function updateLearningStatus() {
+            const errorPercent = attempts > 0 ? ((mistakes / attempts) * 100).toFixed(1) : 0;
+            learningStatusEl.textContent = 
+                `Raundi za Kuandikisha: ${attempts} | Makosa (chini ya ${ERROR_THRESHOLD}x): ${mistakes} (${errorPercent}%)`;
+            
+            localStorage.setItem('aviator_attempts', attempts);
+            localStorage.setItem('aviator_mistakes', mistakes);
+
+            checkForAutoReset(); 
+        }
+
+        function getZone(multiplier) {
+            if (multiplier >= 10.00) return 'Orange Zone (Jackpot)';
+            if (multiplier >= ERROR_THRESHOLD) return 'Green Zone';
+            return 'Red Zone';
+        }
+
+        function getZoneClass(multiplier) {
+            if (multiplier >= 10.00) return 'orange';
+            if (multiplier >= ERROR_THRESHOLD) return 'green';
+            return 'red';
+        }
+        
+        function formatTime(date) {
+            return date.toTimeString().split(' ')[0];
+        }
+
+        function getCurrentCycleSeconds() {
+            const now = new Date();
+            const totalSecondsOfDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            return totalSecondsOfDay % CYCLE_SECONDS; 
+        }
+
+        function getCycleTimeDisplay(cycleSeconds) {
+            const minutes = Math.floor(cycleSeconds / 60);
+            const seconds = cycleSeconds % 60;
+            return `⏳ Cycle: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            clockDisplay.textContent = formatTime(now);
+            const currentCycleSecond = getCurrentCycleSeconds();
+            cycleTimeDisplay.textContent = getCycleTimeDisplay(currentCycleSecond);
+            assessRiskByTime(currentCycleSecond); 
+        }
+
+        function updateHistory(newRound) {
+            history.unshift(newRound);
+            if (history.length > 50) { 
+                history.pop(); 
+            }
+            localStorage.setItem('aviator_history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyListEl.innerHTML = history.map(item => {
+                const zoneClass = getZoneClass(parseFloat(item.actual));
+                return `<div class="history-item">
+                    [${item.time} / ${item.cycleTime.replace('⏳ Cycle: ', '')}] A: <span class="${zoneClass}">${item.actual}x (${item.zone})</span>
+                </div>`;
+            }).join('');
+        }
+
+        function assessRiskByTime(currentCycleSecond) {
+            const windowSize = 60; 
+            let redCount = 0;
+            let orangeCount = 0;
+            let totalCount = 0;
+
+            for (const item of history) {
+                const itemCycleSecond = parseInt(item.cycleSecond);
+                let diff = Math.abs(currentCycleSecond - itemCycleSecond);
+                
+                if (diff > CYCLE_SECONDS / 2) {
+                    diff = CYCLE_SECONDS - diff;
+                }
+
+                if (diff <= windowSize) {
+                    totalCount++;
+                    if (item.zone.includes('Red')) redCount++;
+                    if (item.zone.includes('Orange')) orangeCount++;
+                }
+            }
+            
+            let message = '';
+            
+            if (totalCount < 5) { 
+                message = `Chukua tahadhari: Historia bado haitoshi katika muda huu (${getCycleTimeDisplay(currentCycleSecond).replace('⏳ Cycle: ', '')}).`;
+                riskAssessmentEl.style.backgroundColor = '#555';
+            } else {
+                const redPercent = (redCount / totalCount) * 100;
+                const orangePercent = (orangeCount / totalCount) * 100;
+
+                if (redPercent > 60) {
+                    message = `🚨 HATARI KUBWA! ${redPercent.toFixed(0)}% ya raundi zilizopita katika muda huu zimefungwa chini ya ${ERROR_THRESHOLD}x.`;
+                    riskAssessmentEl.style.backgroundColor = '#E57373'; 
+                } else if (orangePercent > 10) {
+                    message = `💰 JACKPOT INAKUJA? ${orangePercent.toFixed(0)}% ya raundi zimefika 10.00x+ katika muda huu.`;
+                    riskAssessmentEl.style.backgroundColor = '#4CAF50'; 
+                } else {
+                    message = `🟢 HALI YA KAWAIDA. Hatari ni ndogo kwa sasa.`;
+                    riskAssessmentEl.style.backgroundColor = '#333'; 
+                }
+            }
+            riskAssessmentEl.textContent = message;
+        }
+
+
+        // --- VOICE INPUT LOGIC (MODIFIED AGAIN) ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US'; // Changed back to English for better number recognition
+            recognition.interimResults = false; // Capture only final results
+            recognition.maxAlternatives = 1; // Take the best result only
+            
+            micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR;
+
+            micBtn.addEventListener('click', () => {
+                logStatusEl.textContent = "Sema namba ya multiplier (Mfano: 'one point five zero')...";
+                micBtn.style.backgroundColor = MIC_BUTTON_RECORDING_COLOR;
+                micBtn.textContent = '🔴';
+                try {
+                    recognition.start();
+                } catch (e) {
+                     // In case recognition is already running
+                     console.error(e);
+                }
+            });
+
+            recognition.onresult = (event) => {
+                const result = event.results[0][0].transcript;
+                // Replace 'point' or 'dot' with actual dot, then search for a number pattern
+                const cleanedResult = result.toLowerCase().replace(/point|dot/g, '.');
+                const numberMatch = cleanedResult.match(/(\d+\.?\d*)/); 
+                
+                micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR;
+                micBtn.textContent = '🎤';
+
+                if (numberMatch) {
+                    const number = parseFloat(numberMatch[0]).toFixed(2);
+                    roundInput.value = number;
+                    
+                    if (isAutoSubmitEnabled) {
+                        logButton.click();
+                        logStatusEl.textContent = `Sauti (${number}x) Imepokelewa na Kuandikishwa.`;
+                    } else {
+                        logStatusEl.textContent = `Sauti (${number}x) Imepokelewa. Bonyeza kitufe kuingiza.`;
+                    }
+                } else {
+                     logStatusEl.textContent = "Sikuelewi/Namba haikupatikana. Jaribu tena au andika.";
+                }
+            };
+
+            recognition.onspeechend = () => {
+                micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR; 
+                micBtn.textContent = '🎤';
+                // Stopping recognition here is often less stable than letting it stop on its own
+            };
+            
+            recognition.onerror = (event) => {
+                micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR; 
+                micBtn.textContent = '🎤';
+                logStatusEl.textContent = `Kosa la Sauti: ${event.error}. Jaribu tena.`;
+            };
+            
+            recognition.onend = () => {
+                micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR; 
+                micBtn.textContent = '🎤';
+            };
+
+        } else {
+            micBtn.style.display = 'none';
+            autoSubmitToggle.style.display = 'none';
+            logStatusEl.textContent = "Speech Recognition Haitegemewani Kwenye Kivinjari Hiki.";
+        }
+
+        // --- AUTO-SUBMIT TOGGLE HANDLER (Unchanged) ---
+        autoSubmitToggle.addEventListener('click', () => {
+            isAutoSubmitEnabled = !isAutoSubmitEnabled;
+            if (isAutoSubmitEnabled) {
+                autoSubmitToggle.textContent = 'Automatic Voice Input: ON ✅';
+                autoSubmitToggle.classList.remove('off');
+                autoSubmitToggle.classList.add('on');
+            } else {
+                autoSubmitToggle.textContent = 'Automatic Voice Input: OFF ❌';
+                autoSubmitToggle.classList.remove('on');
+                autoSubmitToggle.classList.add('off');
+            }
+        });
+
+
+        // --- MAIN LOGGING BUTTON HANDLER (Unchanged) ---
+        logButton.addEventListener('click', () => {
+            const actual = parseFloat(roundInput.value);
+
+            if (isNaN(actual) || actual <= 0.99) {
+                logStatusEl.textContent = "Weka namba sahihi (Multipler > 1.0)";
+                return;
+            }
+
+            attempts++;
+            const isMistake = (actual < ERROR_THRESHOLD);
+            if (isMistake) { 
+                mistakes++;
+            }
+
+            const historyEntry = {
+                time: formatTime(new Date()),
+                cycleTime: getCycleTimeDisplay(getCurrentCycleSeconds()),
+                cycleSecond: getCurrentCycleSeconds(),
+                actual: actual.toFixed(2),
+                zone: getZone(actual),
+                isMistake: isMistake,
+            };
+            updateHistory(historyEntry);
+
+            updateLearningStatus();
+            logStatusEl.textContent = `Matokeo ya ${actual.toFixed(2)}x Yameandikishwa.`;
+            zoneStatusEl.className = `zone-status ${getZoneClass(actual)}`;
+            zoneStatusEl.textContent = `Hii ni: ${getZone(actual)}`;
+            roundInput.value = '';
+        });
+
+        // --- DELETE LAST ROUND BUTTON HANDLER (Unchanged) ---
+        deleteLastBtn.addEventListener('click', () => {
+            if (history.length === 0) {
+                logStatusEl.textContent = "Hakuna raundi za kufuta.";
+                return;
+            }
+
+            const deletedRound = history.shift();
+
+            attempts = Math.max(0, attempts - 1);
+            if (deletedRound.isMistake) {
+                mistakes = Math.max(0, mistakes - 1);
+            }
+
+            localStorage.setItem('aviator_history', JSON.stringify(history));
+            updateLearningStatus();
+            renderHistory();
+            logStatusEl.textContent = `Raundi ya mwisho (${deletedRound.actual}x) imefutwa.`;
+        });
+
+        // --- RESET ERRORS BUTTON HANDLER (Unchanged) ---
+        resetErrorsBtn.addEventListener('click', () => {
+             if(confirm("Uko na uhakika unataka kufuta rekodi zote za MAKOSA (ERRORS)? Jaribio (Attempts) na Historia (History) zitabaki.")) {
+                 resetSystem(false);
+                 resetWarningEl.textContent = 'Makosa Yote Yamefutwa.';
+             }
+        });
+
+
+        // Initialization
+        setInterval(updateClock, 1000); 
+        updateLearningStatus();
+        renderHistory();
+    </script>
+</body>
+</html>
