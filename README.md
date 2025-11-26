@@ -1,1 +1,1 @@
-# Aviator-bot-test working for bet
+# Aviator-bot-test
